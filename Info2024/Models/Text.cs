@@ -59,12 +59,12 @@ namespace Info2024.Models
 		//Kategoria tekstu
 		[ForeignKey("CategoryId")]
 		public Category? Category { get; set; }
-
+		
 		[Display(Name = "Autor tekstu:")]
-		public string? Id { get; set; } 
+		public string? UserId { get; set; } 
 		//Autor tekstu
-		[ForeignKey("Id")]
-		public AppUser? User { get; set; }
+		[ForeignKey("UserId")]
+		public AppUser? Author { get; set; }
 
 		//Lista wszystkich komentarzy dodanych do tekstu
 		public ICollection<Opinion> Opinions { get; set; } = new List<Opinion>();
