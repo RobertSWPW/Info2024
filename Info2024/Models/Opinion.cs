@@ -9,7 +9,6 @@ namespace Info2024.Models
 		{
 			Comment = string.Empty;
 			AddedDate = DateTime.Now;
-			Id = string.Empty;
 		}
 
 		public int OpinionId { get; set; }
