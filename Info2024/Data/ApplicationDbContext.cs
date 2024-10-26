@@ -21,30 +21,30 @@ namespace Info2024.Data
 
 			// Alternatywna konfiguracja relacji przez Fluent API
 			modelBuilder.Entity<Text>()
-					.HasOne(t => t.Category)
-					.WithMany(c => c.Texts)
-					.HasForeignKey(t => t.CategoryId)
-					.OnDelete(DeleteBehavior.Restrict); 
-					//uniemożliwia usunięcie kategorii, gdy są do niej przypisane teksty
+				.HasOne(t => t.Category)
+				.WithMany(c => c.Texts)
+				.HasForeignKey(t => t.CategoryId)
+				.OnDelete(DeleteBehavior.Restrict); 
+				//uniemożliwia usunięcie kategorii, gdy są do niej przypisane teksty
 
 			modelBuilder.Entity<Text>()
-					.HasOne(t => t.User)
-					.WithMany(u => u.Texts)
-					.HasForeignKey(t => t.Id)
-					.OnDelete(DeleteBehavior.Restrict);
+				.HasOne(t => t.Author)
+				.WithMany(u => u.Texts)
+				.HasForeignKey(t => t.UserId)
+				.OnDelete(DeleteBehavior.Restrict);
 
 			modelBuilder.Entity<Opinion>()
-					.HasOne(o => o.Text)
-					.WithMany(t => t.Opinions)
-					.HasForeignKey(o => o.TextId)
-					.OnDelete(DeleteBehavior.Cascade);
-					//usunięcie tekstu usuwa wszystki opinie do niego przypisane
+				.HasOne(o => o.Text)
+				.WithMany(t => t.Opinions)
+				.HasForeignKey(o => o.TextId)
+				.OnDelete(DeleteBehavior.Cascade);
+				//usunięcie tekstu usuwa wszystki opinie do niego przypisane
 
 			modelBuilder.Entity<Opinion>()
-					.HasOne(o => o.User)
-					.WithMany(u => u.Opinions)
-					.HasForeignKey(o => o.Id)
-					.OnDelete(DeleteBehavior.Restrict);
+				.HasOne(o => o.Author)
+				.WithMany(u => u.Opinions)
+				.HasForeignKey(o => o.UserId)
+				.OnDelete(DeleteBehavior.Restrict);
 		}
 	}
 }
