@@ -38,13 +38,13 @@ namespace Info2024.Models
 		//Komentowany tekst
 		[ForeignKey("TextId")]
 		public Text? Text { get; set; }
-
+		
 		[Required]
 		[Display(Name = "Autor komentarza:")]
-		public string Id { get; set; }
+		public string? UserId { get; set; }
 		//Autor komentarza
-		[ForeignKey("Id")]
-		public AppUser? User { get; set; }
+		[ForeignKey("UserId")]
+		public AppUser? Author { get; set; }
 	}
 
 	public enum Rating
