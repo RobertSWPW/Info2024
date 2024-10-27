@@ -7,46 +7,73 @@ namespace Info2024.Data
 {
   public class InfoSeeder
   {
-    public static void Initialize(IServiceProvider serviceProvider)
-    {
-      using (var dbContext = new ApplicationDbContext(serviceProvider.GetRequiredService<DbContextOptions<ApplicationDbContext>>()))
+    public static async Task Initialize(IServiceProvider serviceProvider)
+		{
+			using (var scope = serviceProvider.CreateScope())
+			{
+				var services = scope.ServiceProvider;
+				try
+				{
+					var dbContext = services.GetRequiredService<ApplicationDbContext>();
+					var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+					var userManager = services.GetRequiredService<UserManager<AppUser>>();
 
-        if (dbContext.Database.CanConnect())
-        {
-          SeedRoles(dbContext);
-          SeedUsers(dbContext);
-          SeedCategoris(dbContext);
-          SeedTexts(dbContext);
-          SeedOpinions(dbContext);
-        }
-    }
+					if (await dbContext.Database.CanConnectAsync())
+					{
+						await SeedRolesAsync(dbContext, roleManager);
+						await SeedUsersAsync(dbContext, userManager);
+						await SeedCategoriesAsync(dbContext);
+						await SeedTextsAsync(dbContext);
+						await SeedOpinionsAsync(dbContext);
 
-    //zakładanie ról w apliakcji, o ile nie istnieją
-    private static void SeedRoles(ApplicationDbContext dbContext)
-    {
-      var roleStore = new RoleStore<IdentityRole>(dbContext);
+						await dbContext.SaveChangesAsync();
+					}
+				}
+				catch (Exception ex)
+				{
+					throw new Exception($"Błąd podczas inicjalizacji danych: {ex.Message}");
+				}
+			}
+		}
 
-      if (!dbContext.Roles.Any(r => r.Name == "admin"))
-      {
-        roleStore.CreateAsync(new IdentityRole
-        {
-          Name = "admin",
-          NormalizedName = "admin"
-        }).Wait();
-      }
+		//zakładanie ról w apliakcji, o ile nie istnieją
+		private static async Task SeedRolesAsync(ApplicationDbContext dbContext, RoleManager<IdentityRole> roleManager)
+		{
+			try
+			{
+				// role w tablicy dla łatwiejszego zarządzania
+				string[] roleNames = { "admin", "author" };
 
-      if (!dbContext.Roles.Any(r => r.Name == "author"))
-      {
-        roleStore.CreateAsync(new IdentityRole
-        {
-          Name = "author",
-          NormalizedName = "author"
-        }).Wait();
-      }
-    }  // koniec ról
+				foreach (var roleName in roleNames)
+				{
+					if (!await dbContext.Roles.AnyAsync(r => r.Name == roleName))
+					{
+						var role = new IdentityRole
+						{
+							Name = roleName,
+							NormalizedName = roleName.ToUpper() 
+						};
 
-    //zakładanie kont uzytkowników w apliakcji, o ile nie istnieją
-    private static void SeedUsers(ApplicationDbContext dbContext)
+						var result = await roleManager.CreateAsync(role);
+
+						if (!result.Succeeded)
+						{
+							var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+							throw new Exception($"Nie udało się utworzyć roli {roleName}. Błędy: {errors}");
+						}
+					}
+				}
+				await dbContext.SaveChangesAsync();
+			}
+			catch (Exception ex)
+			{
+				// Tu możesz dodać logowanie błędów
+				throw new Exception($"Błąd podczas tworzenia ról: {ex.Message}");
+			}
+		}  // koniec ról
+
+		//zakładanie kont uzytkowników w apliakcji, o ile nie istnieją
+		private static void SeedUsers(ApplicationDbContext dbContext)
     {
       if (!dbContext.Users.Any(u => u.UserName == "autor1@portal.pl"))
       {
