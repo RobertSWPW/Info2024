@@ -1,15 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using Info2024.Data;
+﻿using Info2024.Data;
 using Info2024.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Info2024.Controllers
 {
+	[Authorize(Roles="admin, author")]
 	public class CategoriesController : Controller
 	{
 		private readonly ApplicationDbContext _context;
@@ -44,6 +41,7 @@ namespace Info2024.Controllers
 		}
 
 		// GET: Categories/Create
+		[Authorize(Roles = "admin")]
 		public IActionResult Create()
 		{
 			return View();
@@ -54,6 +52,7 @@ namespace Info2024.Controllers
 		// For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
 		[HttpPost]
 		[ValidateAntiForgeryToken]
+		[Authorize(Roles = "admin")]
 		public async Task<IActionResult> Create([Bind("CategoryId,Name,Description,Icon,Active,Display")] Category category)
 		{
 			if (ModelState.IsValid)
@@ -74,6 +73,7 @@ namespace Info2024.Controllers
 		}
 
 		// GET: Categories/Edit/5
+		[Authorize(Roles = "admin")]
 		public async Task<IActionResult> Edit(int? id)
 		{
 			if (id == null)
@@ -94,6 +94,7 @@ namespace Info2024.Controllers
 		// For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
 		[HttpPost]
 		[ValidateAntiForgeryToken]
+		[Authorize(Roles = "admin")]
 		public async Task<IActionResult> Edit(int id, [Bind("CategoryId,Name,Description,Icon,Active,Display")] Category category)
 		{
 			if (id != category.CategoryId)
@@ -125,6 +126,7 @@ namespace Info2024.Controllers
 		}
 
 		// GET: Categories/Delete/5
+		[Authorize(Roles = "admin")]
 		public async Task<IActionResult> Delete(int? id)
 		{
 			if (id == null)
@@ -145,6 +147,7 @@ namespace Info2024.Controllers
 		// POST: Categories/Delete/5
 		[HttpPost, ActionName("Delete")]
 		[ValidateAntiForgeryToken]
+		[Authorize(Roles = "admin")]
 		public async Task<IActionResult> DeleteConfirmed(int id)
 		{
 			var category = await _context.Categories.FindAsync(id);
