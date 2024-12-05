@@ -22,8 +22,21 @@
 								@Html.DropDownList("Autor", ViewBag.Author, "--- wszyscy ---", htmlAttributes: new { @class = "form-control" })
 							</div>
 							<div class="form-group col-auto">
+								<label for="Klucz">Słowo kluczowe:</label>
+								<input type="text" asp-for="TextList.Keyword" class="form-control" id="Klucz" name="Klucz" list="tagList" />
+								<datalist id="tagList">
+									@if (ViewData["Keyword"] is List<string> tags)
+									{
+										@foreach (var tag in (List<string>)ViewData["Keyword"])
+										{
+											<option value="@tag"></option>
+										}
+									}
+								</datalist>
+							</div>
+							<div class="form-group col-auto">
 								<label for="Fraza">Fragment tekstu:</label>
-								<input type="text" class="form-control" id="Fraza" name="Fraza" placeholder="Szukany ciąg" value="@Model.TextList?.Phrase">
+								<input type="text"  class="form-control" id="Fraza" name="Fraza" placeholder="Szukany ciąg" value="@Model.TextList?.Phrase">
 							</div>
 							<button type="submit" class="btn btn-primary mt-4 col-auto">Filtruj</button>
 						</div>
@@ -78,19 +91,19 @@
 					if (Model.TextList.PageNumber > 1)
 					{
 						<li class="page-item">
-							<a class="page-link" href="@Url.Action("Index", "Texts", new{PageNumber = Model.TextList.PageNumber - 1, Kategoria = Model.TextList.Category, Autor = Model.TextList.Author, Fraza = Model.TextList.Phrase})">Poprzednia</a>
+							<a class="page-link" href="@Url.Action("Index", "Texts", new{PageNumber = Model.TextList.PageNumber - 1, Kategoria = Model.TextList.Category, Autor = Model.TextList.Author, Fraza = Model.TextList.Phrase, Klucz=Model.TextList.Keyword})">Poprzednia</a>
 						</li>
 					}
 					for (var i = 1; i <= Model.TextList.PageCount; i++)
 					{
 						<li class="@(i == @Model.TextList.PageNumber ? "page-item active" : "page-active")">
-							<a class="page-link" href="@Url.Action("Index", "Texts", new{PageNumber = i, Kategoria = Model.TextList.Category, Autor = Model.TextList.Author, Fraza = Model.TextList.Phrase})">@i</a>
+							<a class="page-link" href="@Url.Action("Index", "Texts", new{PageNumber = i, Kategoria = Model.TextList.Category, Autor = Model.TextList.Author, Fraza = Model.TextList.Phrase, Klucz=Model.TextList.Keyword})">@i</a>
 						</li>
 					}
 					if (Model.TextList.PageNumber < Model.TextList.PageCount)
 					{
 						<li class="page-item">
-							<a class="page-link" href="@Url.Action("Index", "Texts", new{PageNumber = Model.TextList.PageNumber + 1, Kategoria = Model.TextList.Category, Autor = Model.TextList.Author, Fraza = Model.TextList.Phrase})">Następna</a>
+							<a class="page-link" href="@Url.Action("Index", "Texts", new{PageNumber = Model.TextList.PageNumber + 1, Kategoria = Model.TextList.Category, Autor = Model.TextList.Author, Fraza = Model.TextList.Phrase, Klucz=Model.TextList.Keyword})">Następna</a>
 						</li>
 					}
 				}

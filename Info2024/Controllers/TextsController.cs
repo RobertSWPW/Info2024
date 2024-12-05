@@ -1,6 +1,7 @@
 ﻿using Info2024.Data;
 using Info2024.Models;
 using Info2024.Models.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -18,7 +19,7 @@ namespace Info2024.Controllers
 		}
 
 		// GET: Texts
-		public async Task<IActionResult> Index(string Fraza, string Autor, int? Kategoria, int PageNumber = 1)
+		public async Task<IActionResult> Index(string Fraza, string Autor, int? Kategoria, string Klucz, int PageNumber = 1)
 		{
 			TextIndexViewModel textIndexViewModel = new()
 			{
@@ -43,6 +44,10 @@ namespace Info2024.Controllers
 			{
 				SelectedTexts = (IOrderedQueryable<Text>)SelectedTexts.Where(r => r.Content.Contains(Fraza));
 			}
+			if (!String.IsNullOrEmpty(Klucz))
+			{
+				SelectedTexts = (IOrderedQueryable<Text>)SelectedTexts.Where(r => r.Keywords.Contains(Klucz));
+			}
 
 			textIndexViewModel.TextList.TextCount = SelectedTexts.Count();
 
@@ -51,6 +56,7 @@ namespace Info2024.Controllers
 			textIndexViewModel.TextList.Author = Autor;
 			textIndexViewModel.TextList.Phrase = Fraza;
 			textIndexViewModel.TextList.Category = Kategoria;
+			textIndexViewModel.TextList.Keyword = Klucz;
 
 			textIndexViewModel.Texts = await SelectedTexts
 								.Skip((PageNumber - 1) * textIndexViewModel.TextList.PageSize)
@@ -68,10 +74,22 @@ namespace Info2024.Controllers
 				.Distinct(),
 				"Id", "FullName", Autor);
 
+			var tags = _context.Texts
+				.AsEnumerable() 
+				.Where(t => !string.IsNullOrEmpty(t.Keywords))
+				.SelectMany(t => t.Keywords.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+				.Select(k => k.Trim())
+				.Distinct(StringComparer.OrdinalIgnoreCase)
+				.OrderBy(k => k)
+				.ToList();
+
+			ViewData["Keyword"] = tags;
+
 			return View(textIndexViewModel);
 		}
 
-		// GET: Texts
+		// GET: Texts List
+		[Authorize(Roles = "admin")]
 		public async Task<IActionResult> List()
 		{
 			var applicationDbContext = _context.Texts.Include(t => t.Author).Include(t => t.Category);
