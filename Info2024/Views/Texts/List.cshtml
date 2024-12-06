@@ -66,7 +66,7 @@
 					<img src="@Url.Content(String.IsNullOrEmpty(item.Graphic) ? "~/img/mini/brak.jpg" : "~/img/mini/"+item.Graphic)" width="150" alt="@item.Category.Name" />
 				</td>
 				<td>
-					@Html.DisplayFor(modelItem => item.Active)
+					@(item.Active == true ? "Tak" : "Nie")
 				</td>
 				<td>
 					@Html.DisplayFor(modelItem => item.AddedDate)
@@ -85,38 +85,70 @@
 			</tr>
 		}
 	</tbody>
+	<tfoot>
+		<tr>
+			<th></th>
+			<th></th>
+			<th></th>
+			<th></th>
+			<th></th>
+			<th></th>
+			<th></th>
+			<th></th>
+			<th></th>
+		</tr>
+	</tfoot>
 </table>
 
-@section Scripts{
+@section Scripts {
 	<script src="https://cdn.datatables.net/v/bs5/dt-2.1.8/datatables.min.js"></script>
 	<script>
 		$(document).ready(function() {
-				$('#teksty').DataTable({
-						language: {
-								"decimal": "",
-								"emptyTable": "Brak danych do wyświetlenia",
-								"info": "Pozycje od _START_ do _END_ z _TOTAL_ rekordów",
-								"infoEmpty": "Pozycji 0 z 0 dostępnych",
-								"infoFiltered": "(filtrowanie z _MAX_ dostępnych pozycji)",
-								"infoPostFix": "",
-								"thousands": " ",
-								"lengthMenu": "Pokaż _MENU_ pozycji",
-								"loadingRecords": "Ładowanie...",
-								"processing": "Przetwarzanie...",
-								"search": "Wyszukaj:",
-								"zeroRecords": "Nie znaleziono danych",
-								"paginate": {
-										"first": "Pierwsza",
-										"last": "Ostatnia",
-										"next": "Następna",
-										"previous": "Poprzednia"
-								},
-								"aria": {
-										"sortAscending": ": sortuje kolumnę rosnąco",
-										"sortDescending": ": sortuje kolumnę malejąco"
-								}
-						}
-				});
-		} );
+			$('#teksty').DataTable({
+				language: {
+					"decimal": "",
+					"emptyTable": "Brak danych do wyświetlenia",
+					"info": "Pozycje od _START_ do _END_ z _TOTAL_ rekordów",
+					"infoEmpty": "Pozycji 0 z 0 dostępnych",
+					"infoFiltered": "(filtrowanie z _MAX_ dostępnych pozycji)",
+					"infoPostFix": "",
+					"thousands": " ",
+					"lengthMenu": "Pokaż _MENU_ pozycji",
+					"loadingRecords": "Ładowanie...",
+					"processing": "Przetwarzanie...",
+					"search": "Wyszukaj:",
+					"zeroRecords": "Nie znaleziono danych",
+					"paginate": {
+							"first": "Pierwsza",
+							"last": "Ostatnia",
+							"next": "Następna",
+							"previous": "Poprzednia"
+					},
+					"aria": {
+							"sortAscending": ": sortuje kolumnę rosnąco",
+							"sortDescending": ": sortuje kolumnę malejąco"
+					}
+			},
+				initComplete: function () {
+					this.api().columns().every(function () {
+							var column = this;
+							var header = $(column.header()).text().trim();
+							// Pomijanie kolumny z grafiką
+							if (header === 'Grafika do tekstu:') {
+									return;
+							}
+							// Standardowe pole tekstowe dla pozostałych kolumn
+							var select = $('<input type="text" class="form-control"/>')
+							.attr('placeholder', header)
+							.appendTo($(column.footer()).empty())
+							.on('keyup change clear', function () {
+									if (column.search() !== this.value) {
+											column.search(this.value).draw();
+									}
+							});
+					});
+				}
+			});
+		});
 	</script>
 }
