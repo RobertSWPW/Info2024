@@ -26,10 +26,9 @@ namespace Info2024.Models
 		[DisplayFormat(DataFormatString = "{0:dd.MM.yyyy HH:mm}", ApplyFormatInEditMode = true)]
 		public DateTime AddedDate { get; set; }
 
-		[Required(ErrorMessage = "Proszę wybrać ocenę")]
 		[Display(Name = "Ocena tekstu:")]
-		[Range(1, 5, ErrorMessage = "Proszę wybrać ocenę od 1 do 5")]
-		public Rating Rating { get; set; }
+		[Range(0, 5, ErrorMessage = "Proszę wybrać ocenę od 0 do 5")]
+		public Rating? Rating { get; set; }
 
 		[Required]
 		[Display(Name = "Komentowany tekst:")]
@@ -40,7 +39,7 @@ namespace Info2024.Models
 		
 		[Required]
 		[Display(Name = "Autor komentarza:")]
-		public string? UserId { get; set; }
+		public string UserId { get; set; }
 		//Autor komentarza
 		[ForeignKey("UserId")]
 		public AppUser? Author { get; set; }
@@ -48,6 +47,9 @@ namespace Info2024.Models
 
 	public enum Rating
 	{
+		[Display(Name = "Brak")]
+		Unrated = 0,
+
 		[Display(Name = "Nieprzydatny")]
 		Useless = 1,
 

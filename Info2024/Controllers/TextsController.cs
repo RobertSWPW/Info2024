@@ -1,4 +1,5 @@
 ﻿using Info2024.Data;
+using Info2024.Infrastructure;
 using Info2024.Models;
 using Info2024.Models.ViewModels;
 using Microsoft.AspNetCore.Authorization;
@@ -105,19 +106,40 @@ namespace Info2024.Controllers
 				return NotFound();
 			}
 
-			var text = await _context.Texts
-					.Include(t => t.Author)
+			var selectedText = await _context.Texts
 					.Include(t => t.Category)
-					.FirstOrDefaultAsync(m => m.TextId == id);
-			if (text == null)
+					.Include(t => t.Author)
+					.Include(t => t.Opinions)
+					.ThenInclude(c => c.Author)
+					.Where(t => t.Active == true && t.TextId == id)
+					.FirstOrDefaultAsync();
+			
+			if (selectedText == null)
 			{
 				return NotFound();
 			}
 
-			return View(text);
+			TextWithOpinions textWithOpinions = new()
+			{
+				SelectedText = selectedText,
+				ReadingTime = (int)Math.Ceiling((double) selectedText.Content.Length / 1400),
+				CommentsCount = selectedText.Opinions.Count
+			};
+
+			textWithOpinions.RatingsCount = textWithOpinions.CommentsCount > 0
+				? selectedText.Opinions.Count(x => x.Rating != null) : 0;
+
+			textWithOpinions.AverageRating = textWithOpinions.RatingsCount > 0
+			? (float)selectedText.Opinions.Where(x => x.Rating != null).Average(x => (int)x.Rating)
+			: 0f;
+
+			textWithOpinions.Description = Variety.Phrase("komentarz", "komentarze", "komentarzy", textWithOpinions.CommentsCount);
+
+			return View(textWithOpinions);
 		}
 
 		// GET: Texts/Create
+		[Authorize(Roles = "admin, author")]
 		public IActionResult Create()
 		{
 			ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id");
@@ -126,8 +148,7 @@ namespace Info2024.Controllers
 		}
 
 		// POST: Texts/Create
-		// To protect from overposting attacks, enable the specific properties you want to bind to.
-		// For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+		[Authorize(Roles = "admin, author")]
 		[HttpPost]
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Create([Bind("TextId,Title,Summary,Keywords,Content,Graphic,Active,AddedDate,CategoryId,UserId")] Text text)
@@ -144,6 +165,7 @@ namespace Info2024.Controllers
 		}
 
 		// GET: Texts/Edit/5
+		[Authorize(Roles = "admin, author")]
 		public async Task<IActionResult> Edit(int? id)
 		{
 			if (id == null)
@@ -162,8 +184,7 @@ namespace Info2024.Controllers
 		}
 
 		// POST: Texts/Edit/5
-		// To protect from overposting attacks, enable the specific properties you want to bind to.
-		// For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+		[Authorize(Roles = "admin, author")]
 		[HttpPost]
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Edit(int id, [Bind("TextId,Title,Summary,Keywords,Content,Graphic,Active,AddedDate,CategoryId,UserId")] Text text)
@@ -199,6 +220,7 @@ namespace Info2024.Controllers
 		}
 
 		// GET: Texts/Delete/5
+		[Authorize(Roles = "admin")]
 		public async Task<IActionResult> Delete(int? id)
 		{
 			if (id == null)
@@ -219,6 +241,7 @@ namespace Info2024.Controllers
 		}
 
 		// POST: Texts/Delete/5
+		[Authorize(Roles = "admin")]
 		[HttpPost, ActionName("Delete")]
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> DeleteConfirmed(int id)
