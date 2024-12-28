@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 
 namespace Info2024.Controllers
@@ -103,7 +104,7 @@ namespace Info2024.Controllers
 		{
 			if (id == null)
 			{
-				return NotFound();
+				return NotFound	();
 			}
 
 			var selectedText = await _context.Texts
@@ -123,7 +124,13 @@ namespace Info2024.Controllers
 			{
 				SelectedText = selectedText,
 				ReadingTime = (int)Math.Ceiling((double) selectedText.Content.Length / 1400),
-				CommentsCount = selectedText.Opinions.Count
+				CommentsCount = selectedText.Opinions.Count,
+				NewOpinion = new()
+				{
+					TextId = selectedText.TextId,
+					UserId = User.FindFirstValue(ClaimTypes.NameIdentifier),
+			    Text = selectedText
+				}
 			};
 
 			textWithOpinions.RatingsCount = textWithOpinions.CommentsCount > 0

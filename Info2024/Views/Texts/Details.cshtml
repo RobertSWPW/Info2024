@@ -30,7 +30,7 @@
         <div class="col-6 col-lg-12">
           <p><i class="bi bi-smartwatch me-1" title="Czas"></i>Czas czytania ok. @Model.ReadingTime min</p>
           <p><i class="bi bi-chat-square-text me-1" title="Liczba komenatrzy"></i>@Model.CommentsCount @Model.Description</p>
-          <p><i class="bi bi-trophy me-1" title="Ocena"></i>Ocena: @Model.AverageRating z @Model.RatingsCount</p>
+          <p><i class="bi bi-trophy me-1" title="Ocena"></i>Ocena: @Model.AverageRating.ToString("0.0") z @Model.RatingsCount</p>
         </div>
       </div>
       @{
@@ -75,9 +75,26 @@
     }
     @if (User.Identity.IsAuthenticated)
     {
-      <a asp-action="Create" asp-controller="Opinions" asp-route-id="@Model?.SelectedText.TextId" class="btn btn-success">Dodaj opinię</a>
+      <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#newOpinion"> 
+        Dodaj opinię 
+      </button>
     }
   </section>
+
+  <!-- Modal -->
+  <div class="modal fade" id="newOpinion" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5 text-primary" id="ModalLabel">Dodawanie opinii</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zamknij"> </button>
+        </div>
+        <div class="modal-body">
+          <partial name="~/Views/Opinions/_CreatePartial.cshtml" model="@Model.NewOpinion" />
+        </div>
+      </div>
+    </div>
+  </div>
 
   <section id="comments">
     @if (!User.Identity.IsAuthenticated)
@@ -116,3 +133,9 @@
     }
   </section>
 </div>
+
+@section Scripts {
+  @{
+    await Html.RenderPartialAsync("_ValidationScriptsPartial");
+  }
+}
