@@ -36,7 +36,7 @@
 			<th>
 				Autor:
 			</th>
-			<th></th>
+			<th width="10%"></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -79,6 +79,7 @@
 				</td>
 				<td>
 					<a class="btn btn-outline-primary rounded-circle my-1" title="Szczegóły" asp-action="Details" asp-route-id="@item.TextId"><i class="bi-eye" aria-label="Treść tekstu"></i></a>
+					<a class="btn btn-outline-info rounded-circle my-1" title="Opinie" asp-controller="Opinions" asp-action="Index" asp-route-id="@item.TextId"><i class="bi-chat-left-text" aria-label="Opinie o tekście"></i></a>
 					<a class="btn btn-outline-warning rounded-circle my-1" title="Edycja" asp-action="Edit" asp-route-id="@item.TextId"><i class="bi-pen-fill" aria-label="Edycja tekstu"></i></a>
 					<a class="btn btn-outline-danger rounded-circle my-1" title="Usuwanie" asp-action="Delete" asp-route-id="@item.TextId"><i class="bi-trash" aria-label="Usuwanie tekstu"></i></a>
 				</td>
