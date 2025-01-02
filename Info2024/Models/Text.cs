@@ -40,7 +40,6 @@ namespace Info2024.Models
 
 		[Display(Name = "Grafika do tekstu:")]
 		[StringLength(128)]
-		[FileExtensions(Extensions = ".jpg,.png,.gif,.webp", ErrorMessage = "Dozwolone rozszerzenia to: .jpg, .png, .gif, .webp")]
 		public string? Graphic { get; set; }
 
 		[Required]

@@ -14,10 +14,12 @@ namespace Info2024.Controllers
 	public class TextsController : Controller
 	{
 		private readonly ApplicationDbContext _context;
+		private IWebHostEnvironment _hostEnvironment;
 
-		public TextsController(ApplicationDbContext context)
+		public TextsController(ApplicationDbContext context, IWebHostEnvironment environment)
 		{
 			_context = context;
+			_hostEnvironment = environment;
 		}
 
 		// GET: Texts
@@ -149,8 +151,7 @@ namespace Info2024.Controllers
 		[Authorize(Roles = "admin, author")]
 		public IActionResult Create()
 		{
-			ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id");
-			ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "Description");
+			ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "Name");
 			return View();
 		}
 
@@ -158,16 +159,42 @@ namespace Info2024.Controllers
 		[Authorize(Roles = "admin, author")]
 		[HttpPost]
 		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Create([Bind("TextId,Title,Summary,Keywords,Content,Graphic,Active,AddedDate,CategoryId,UserId")] Text text)
+		public async Task<IActionResult> Create([Bind("TextId,Title,Summary,Keywords,Content,Active,CategoryId")] Text text, IFormFile? picture)
 		{
 			if (ModelState.IsValid)
 			{
+				if (picture != null && picture.Length > 0)
+				{
+					var allowedTypes = new[] { "image/jpeg", "image/png", "image/gif", "image/webp" };
+					if (!allowedTypes.Contains(picture.ContentType))
+					{
+						ModelState.AddModelError("Graphic", "Niedozwolony typ pliku");
+						ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "Name", text.CategoryId);
+						return View(text);
+					} 
+					else 
+					{ 
+						ImageFileUpload imageFileResult = new(_hostEnvironment);
+						FileSendResult fileSendResult = imageFileResult.SendFile(picture, "img", 600);
+						if (fileSendResult.Success)
+						{
+							text.Graphic = fileSendResult.Name;
+						}
+						else
+						{
+							ModelState.AddModelError("Graphic", fileSendResult.Error);
+							ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "Name", text.CategoryId);
+							return View(text);
+						}
+					}
+				}
+				text.UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+				text.AddedDate = DateTime.Now;
 				_context.Add(text);
 				await _context.SaveChangesAsync();
 				return RedirectToAction(nameof(Index));
 			}
-			ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", text.UserId);
-			ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "Description", text.CategoryId);
+			ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "Name", text.CategoryId);
 			return View(text);
 		}
 
