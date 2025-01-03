@@ -17,18 +17,17 @@
 		{
 			<div class="form-group">
 				<label asp-for="Rating" class="control-label"></label>
-				<select asp-for="Rating" class="form-control">
-					<option value="">--- Wybierz ocenę ---</option>
-					@foreach (Rating rating in Enum.GetValues(typeof(Rating)))
-					{
-						if ((int)rating != 0)
-						{
-							<option value="@((int)rating)">
-								@(rating.GetType().GetField(rating.ToString()).GetCustomAttribute<DisplayAttribute>().Name)
-							</option>
-						}
-					}
-				</select>
+				<div class="rating-selector" data-rating-target="Rating">
+					<input type="hidden" id="Rating" name="Rating" value="" />
+					<div class="stars">
+						<i class="bi bi-star text-warning" data-rating="1"></i>
+						<i class="bi bi-star text-warning" data-rating="2"></i>
+						<i class="bi bi-star text-warning" data-rating="3"></i>
+						<i class="bi bi-star text-warning" data-rating="4"></i>
+						<i class="bi bi-star text-warning" data-rating="5"></i>
+					</div>
+				</div>
+
 				<span asp-validation-for="Rating" class="text-danger"></span>
 			</div>
 		}
@@ -41,3 +40,47 @@
 	</form>
 </div>
 
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+      const ratingSelectors = document.querySelectorAll('.rating-selector');
+
+      ratingSelectors.forEach(selector => {
+          const stars = selector.querySelectorAll('.stars i');
+          const targetInputId = selector.dataset.ratingTarget;
+          const targetInput = document.getElementById(targetInputId);
+
+          stars.forEach(star => {
+              star.addEventListener('mouseenter', () => {
+                  const rating = parseInt(star.dataset.rating);
+                  updateStars(stars, rating, 'hover');
+              });
+          });
+
+          selector.querySelector('.stars').addEventListener('mouseleave', () => {
+              const currentRating = targetInput.value ? parseInt(targetInput.value) : null;
+              updateStars(stars, currentRating, 'selected');
+          });
+
+          stars.forEach(star => {
+              star.addEventListener('click', () => {
+                  const rating = parseInt(star.dataset.rating);
+                  targetInput.value = rating;
+                  updateStars(stars, rating, 'selected');
+              });
+          });
+      });
+
+      function updateStars(stars, rating, state) {
+          stars.forEach(star => {
+              const starRating = parseInt(star.dataset.rating);
+              if (rating && starRating <= rating) {
+                  star.classList.remove('bi-star');
+                  star.classList.add('bi-star-fill');
+              } else {
+                  star.classList.remove('bi-star-fill');
+                  star.classList.add('bi-star');
+              }
+          });
+      }
+  });
+</script>

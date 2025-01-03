@@ -30,7 +30,12 @@
         <div class="col-6 col-lg-12">
           <p><i class="bi bi-smartwatch me-1" title="Czas"></i>Czas czytania ok. @Model.ReadingTime min</p>
           <p><i class="bi bi-chat-square-text me-1" title="Liczba komenatrzy"></i>@Model.CommentsCount @Model.Description</p>
-          <p><i class="bi bi-trophy me-1" title="Ocena"></i>Ocena: @Model.AverageRating.ToString("0.0") z @Model.RatingsCount</p>
+          <p><i class="bi bi-trophy me-1" title="Ocena"></i> <star-rating rating-avg=Model.AverageRating rating-count=@Model.RatingsCount></star-rating>
+            @if (@Model.CommentsCount > 0)
+            {
+            <small class="text-secondary"> @Model.AverageRating.ToString("0.0") z @Model.RatingsCount</small>
+           }
+           </p>
         </div>
       </div>
       @{
